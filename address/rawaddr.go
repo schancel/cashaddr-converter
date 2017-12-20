@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/schancel/cashaddr-converter/cashaddress"
+	"github.com/schancel/cashaddr-converter/legacy"
 )
 
 type AddressType byte
@@ -118,6 +119,88 @@ func NewFromCashAddress(addr *cashaddress.Address) (*Address, error) {
 	return &Address{
 		Network: network,
 		Version: addrtype,
+		Payload: addr.Payload,
+	}, nil
+}
+
+// NewFromLegacy allows the construction of a generic address from a legacy
+// address
+func NewFromLegacy(addr *legacy.Address) (*Address, error) {
+	var addrtype AddressType
+	var network NetworkType = MainNet
+
+	switch addr.Version {
+	case legacy.P2KH:
+		addrtype = P2KH
+	case legacy.P2SH:
+		addrtype = P2SH
+	case legacy.P2KHCopay:
+		addrtype = P2KH
+	case legacy.P2SHCopay:
+		addrtype = P2SH
+	case legacy.P2KHTestnet:
+		addrtype = P2KH
+		network = TestNet
+	case legacy.P2SHTestnet:
+		addrtype = P2SH
+		network = TestNet
+	default:
+		return nil, fmt.Errorf("unknown address type: %d", addr.Version)
+	}
+
+	return &Address{
+		Network: network,
+		Version: addrtype,
+		Payload: addr.Payload,
+	}, nil
+}
+
+// Legacy returns a legacy address struct with the appropriate fields set to
+// encode to the correct legacy address version
+func (addr *Address) Legacy() (*legacy.Address, error) {
+	var versionByte uint8 = 0
+	switch {
+	case addr.Version == P2KH:
+		versionByte = legacy.P2KH
+		if addr.Network == TestNet {
+			versionByte = legacy.P2KHTestnet
+		}
+	case addr.Version == P2SH:
+		versionByte = legacy.P2SH
+		if addr.Network == TestNet {
+			versionByte = legacy.P2SHTestnet
+		}
+	default:
+		return nil, errors.New("invalid address type")
+	}
+
+	return &legacy.Address{
+		Version: versionByte,
+		Payload: addr.Payload,
+	}, nil
+}
+
+// Copay returns a legacy address struct with the appropriate fields set to
+// encode to the correct copay address version
+func (addr *Address) Copay() (*legacy.Address, error) {
+	var versionByte uint8 = 0
+	switch {
+	case addr.Version == P2KH:
+		versionByte = legacy.P2KHCopay
+		if addr.Network == TestNet {
+			return nil, errors.New("Copay addresses are not valid on testnet")
+		}
+	case addr.Version == P2SH:
+		versionByte = legacy.P2SHCopay
+		if addr.Network == TestNet {
+			return nil, errors.New("Copay addresses are not valid on testnet")
+		}
+	default:
+		return nil, errors.New("invalid address type")
+	}
+
+	return &legacy.Address{
+		Version: versionByte,
 		Payload: addr.Payload,
 	}, nil
 }
