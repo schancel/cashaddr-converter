@@ -25,6 +25,93 @@ const (
 	MainNet NetworkType = "bitcoincash"
 )
 
+// New from string takes a address string in Legacy or CashAddress format and
+// returns an `*Address` or an error.
+func NewFromString(addr string) (*Address, error) {
+	legaddr, err := legacy.Decode(addr)
+	if err == nil {
+		addr, err := NewFromLegacy(legaddr)
+		if err != nil {
+			return nil, err
+		}
+		return addr, nil
+	}
+
+	cashaddr, err := cashaddress.Decode(addr, cashaddress.MainNet)
+	if err == nil {
+		addr, err := NewFromCashAddress(cashaddr)
+		if err != nil {
+			return nil, err
+		}
+		return addr, nil
+	}
+
+	return nil, errors.New("unable to decode address")
+}
+
+func NewFromCashAddress(addr *cashaddress.Address) (*Address, error) {
+	var network = MainNet
+	var addrtype = P2SH
+
+	switch addr.Prefix {
+	case cashaddress.MainNet:
+		network = MainNet
+	case cashaddress.TestNet:
+		network = TestNet
+	case cashaddress.RegTest:
+		network = RegTest
+	default:
+		return nil, errors.New("invalid address network")
+	}
+
+	switch addr.Version {
+	case cashaddress.P2KH:
+		addrtype = P2KH
+	case cashaddress.P2SH:
+		addrtype = P2SH
+	default:
+		return nil, errors.New("invalid address type")
+	}
+
+	return &Address{
+		Network: network,
+		Version: addrtype,
+		Payload: addr.Payload,
+	}, nil
+}
+
+// NewFromLegacy allows the construction of a generic address from a legacy
+// address
+func NewFromLegacy(addr *legacy.Address) (*Address, error) {
+	var addrtype AddressType
+	var network NetworkType = MainNet
+
+	switch addr.Version {
+	case legacy.P2KH:
+		addrtype = P2KH
+	case legacy.P2SH:
+		addrtype = P2SH
+	case legacy.P2KHCopay:
+		addrtype = P2KH
+	case legacy.P2SHCopay:
+		addrtype = P2SH
+	case legacy.P2KHTestnet:
+		addrtype = P2KH
+		network = TestNet
+	case legacy.P2SHTestnet:
+		addrtype = P2SH
+		network = TestNet
+	default:
+		return nil, fmt.Errorf("unknown address type: %d", addr.Version)
+	}
+
+	return &Address{
+		Network: network,
+		Version: addrtype,
+		Payload: addr.Payload,
+	}, nil
+}
+
 type Address struct {
 	Network NetworkType
 	Version AddressType
@@ -88,69 +175,6 @@ func (addr *Address) CashAddress() (*cashaddress.Address, error) {
 	return &cashaddress.Address{
 		Version: addrtype,
 		Prefix:  network,
-		Payload: addr.Payload,
-	}, nil
-}
-
-func NewFromCashAddress(addr *cashaddress.Address) (*Address, error) {
-	var network = MainNet
-	var addrtype = P2SH
-
-	switch addr.Prefix {
-	case cashaddress.MainNet:
-		network = MainNet
-	case cashaddress.TestNet:
-		network = TestNet
-	case cashaddress.RegTest:
-		network = RegTest
-	default:
-		return nil, errors.New("invalid address network")
-	}
-
-	switch addr.Version {
-	case cashaddress.P2KH:
-		addrtype = P2KH
-	case cashaddress.P2SH:
-		addrtype = P2SH
-	default:
-		return nil, errors.New("invalid address type")
-	}
-
-	return &Address{
-		Network: network,
-		Version: addrtype,
-		Payload: addr.Payload,
-	}, nil
-}
-
-// NewFromLegacy allows the construction of a generic address from a legacy
-// address
-func NewFromLegacy(addr *legacy.Address) (*Address, error) {
-	var addrtype AddressType
-	var network NetworkType = MainNet
-
-	switch addr.Version {
-	case legacy.P2KH:
-		addrtype = P2KH
-	case legacy.P2SH:
-		addrtype = P2SH
-	case legacy.P2KHCopay:
-		addrtype = P2KH
-	case legacy.P2SHCopay:
-		addrtype = P2SH
-	case legacy.P2KHTestnet:
-		addrtype = P2KH
-		network = TestNet
-	case legacy.P2SHTestnet:
-		addrtype = P2SH
-		network = TestNet
-	default:
-		return nil, fmt.Errorf("unknown address type: %d", addr.Version)
-	}
-
-	return &Address{
-		Network: network,
-		Version: addrtype,
 		Payload: addr.Payload,
 	}, nil
 }
