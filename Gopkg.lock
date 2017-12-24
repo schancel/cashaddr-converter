@@ -8,6 +8,24 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/handlers"
+  packages = ["."]
+  revision = "90663712d74cb411cbef281bc1e08c19d1a76145"
+  version = "v1.3.0"
+
+[[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "7f08801859139f86dfafd1c296e2cba9a80d292e"
+  version = "v1.6.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/mr-tron/base58"
   packages = ["base58"]
@@ -28,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3377dc8262fce0852f4a06b34a13dfd67690ba01777b56e93318c4233fc7fe65"
+  inputs-digest = "3b46d94bee39dc2adca85cc92950116ee6e2ffbf0b6cc23b1414321c342c8c20"
   solver-name = "gps-cdcl"
   solver-version = 1
