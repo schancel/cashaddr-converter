@@ -13,6 +13,9 @@ func Decode(originalAddress string) (*Address, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(decoded) < 5 {
+		return nil, errors.New("insufficient decoded data")
+	}
 
 	checksum := decoded[len(decoded)-4:]
 	versionAndRipemd := decoded[:len(decoded)-4]
