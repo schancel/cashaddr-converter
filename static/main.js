@@ -17,7 +17,8 @@ function processResponse(result) {
 		text: result.cashaddr.toUpperCase(),
 		width: 164,
 		height: 164,
-		correctLevel: QRCode.CorrectLevel.L
+		correctLevel: QRCode.CorrectLevel.L,
+
 	});
 
 	var qrcode = new QRCode(document.getElementById("legacy"), {
@@ -36,7 +37,9 @@ function processResponse(result) {
 }
 
 function processError(result) {
-	document.getElementById("result").innerHTML = result;
+	var template = `<div class="pure-u-1">Error: {{error}}</div>`;
+	var html = Mustache.to_html(template, {"error": result});
+	document.getElementById("result").innerHTML = html;
 }
 
 function responeHandler(xhr, func, errfunc) {
