@@ -16,6 +16,10 @@ func Decode(addr string, defaultPrefix string) (*Address, error) {
 		return nil, errors.New("no viable prefix found in address")
 	}
 
+	if strings.ToUpper(addr) != addr && strings.ToLower(addr) != addr {
+		return nil, errors.New("cashaddress contains mixed upper and lowercase characters")
+	}
+
 	decoded, err := baseconv.FromBase32(address)
 	if err != nil {
 		return nil, err

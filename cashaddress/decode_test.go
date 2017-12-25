@@ -51,3 +51,15 @@ func TestChecksum(t *testing.T) {
 		assert.NotEqual(t, err.Error(), "checksum verification failed")
 	}
 }
+
+func TestUpperLower(t *testing.T) {
+	// Checksums are valid, but payload is not
+	values := []string{
+		"bitcoincash:qpm2qsznhKs23z7629mms6s4cwef74vcwvy22gdx6a",
+	}
+	for _, addr := range values {
+		_, err := Decode(addr, MainNet)
+		assert.NotNil(t, err)
+		assert.Equal(t, err.Error(), "cashaddress contains mixed upper and lowercase characters")
+	}
+}
