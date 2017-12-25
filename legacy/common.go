@@ -9,6 +9,8 @@ const (
 	P2SHTestnet       = 196
 )
 
+// Address is a structure which has a raw unpacked version of a legacy
+// address.
 type Address struct {
 	Version uint8
 	Payload []uint8

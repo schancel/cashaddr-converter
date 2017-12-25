@@ -62,7 +62,8 @@ func expandPrefix(prefix string) []uint8 {
 	return out
 }
 
-// CalculateChecksum ...
+// CalculateChecksum calculates a BCH checksum for a nibble-packed cashaddress
+// that properly includes the network prefix.
 func calculateChecksum(prefix string, packedaddr []uint8) uint64 {
 	exphrp := expandPrefix(prefix)
 	combined := append(exphrp, packedaddr...)

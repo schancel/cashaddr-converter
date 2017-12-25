@@ -26,7 +26,7 @@ func (addr *Address) Encode() (string, error) {
 	return fmt.Sprintf("%s:%s", addr.Prefix, base32), nil
 }
 
-// Returns a string, consuming errors.  Probably shouldn't use this most places
+// String returns a string, consuming errors.  Probably shouldn't use this most places
 func (addr *Address) String() string {
 	str, err := addr.Encode()
 	if err != nil {

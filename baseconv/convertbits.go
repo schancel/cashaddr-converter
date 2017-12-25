@@ -1,5 +1,9 @@
 package baseconv
 
+// ConvertBits takes a byte array as `input`, and converts it from `frombits`
+// bit representation to a `tobits` bit representation, while optionally
+// padding it.  ConvertBits returns the new representation and a bool
+// indicating that the output was not truncated.
 func ConvertBits(frombits uint8, tobits uint8, input []uint8, pad bool) ([]uint8, bool) {
 	if frombits > 8 {
 		return nil, false

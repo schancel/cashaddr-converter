@@ -8,6 +8,8 @@ import (
 	"github.com/mr-tron/base58/base58"
 )
 
+// Decode decode a base58 encoded legacy bitcoin address and returns an
+// `Address` structure.
 func Decode(originalAddress string) (*Address, error) {
 	decoded, err := base58.Decode(originalAddress)
 	if err != nil {

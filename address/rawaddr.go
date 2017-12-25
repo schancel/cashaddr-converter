@@ -25,7 +25,7 @@ const (
 	MainNet NetworkType = "bitcoincash"
 )
 
-// New from string takes a address string in Legacy or CashAddress format and
+// NewFromString takes a address string in Legacy or CashAddress format and
 // returns an `*Address` or an error.
 func NewFromString(addr string) (*Address, error) {
 	legaddr, err := legacy.Decode(addr)
@@ -49,6 +49,8 @@ func NewFromString(addr string) (*Address, error) {
 	return nil, errors.New("unable to decode address")
 }
 
+// NewFromCashAddress takes a cashaddress.Address and returns a generic
+// `Address` struct.
 func NewFromCashAddress(addr *cashaddress.Address) (*Address, error) {
 	var network = MainNet
 	var addrtype = P2SH
@@ -80,8 +82,8 @@ func NewFromCashAddress(addr *cashaddress.Address) (*Address, error) {
 	}, nil
 }
 
-// NewFromLegacy allows the construction of a generic address from a legacy
-// address
+// NewFromLegacy takes a cashaddress.Address and returns a generic
+// `Address` struct.
 func NewFromLegacy(addr *legacy.Address) (*Address, error) {
 	var addrtype AddressType
 	var network NetworkType = MainNet
@@ -112,12 +114,15 @@ func NewFromLegacy(addr *legacy.Address) (*Address, error) {
 	}, nil
 }
 
+// Address is a generic representation of a Bitcoin Cash address for
+// converting to various string representations.
 type Address struct {
 	Network NetworkType
 	Version AddressType
 	Payload []byte
 }
 
+// Verify checks to make sure the network and address type are valid.
 func (r *Address) Verify() error {
 	switch r.Version {
 	case P2KH:
@@ -137,6 +142,7 @@ func (r *Address) Verify() error {
 	return nil
 }
 
+// Hex returns a string representation of the Address payload in hexadecimal.
 func (addr *Address) Hex() string {
 	var format = "0x%s"
 	hexStr := strings.ToUpper(big.NewInt(0).SetBytes(addr.Payload).Text(16))
@@ -149,6 +155,8 @@ func (addr *Address) Hex() string {
 	return fmt.Sprintf(format, hexStr)
 }
 
+// CashAddress converts various address fields to create a
+// `*cashaddress.Address`
 func (addr *Address) CashAddress() (*cashaddress.Address, error) {
 	var network = cashaddress.MainNet
 	var addrtype = cashaddress.P2SH
