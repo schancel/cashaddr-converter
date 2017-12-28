@@ -220,12 +220,12 @@ func (addr *Address) Copay() (*legacy.Address, error) {
 	case addr.Version == P2KH:
 		versionByte = legacy.P2KHCopay
 		if addr.Network == TestNet {
-			return nil, errors.New("Copay addresses are not valid on testnet")
+			versionByte = legacy.P2KHTestnet
 		}
 	case addr.Version == P2SH:
 		versionByte = legacy.P2SHCopay
 		if addr.Network == TestNet {
-			return nil, errors.New("Copay addresses are not valid on testnet")
+			versionByte = legacy.P2SHTestnet
 		}
 	default:
 		return nil, errors.New("invalid address type")
