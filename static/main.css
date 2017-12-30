@@ -16,3 +16,22 @@ form {
 	display: block;
 	text-align:center;
 }
+
+.result-label {
+	margin: 2px;
+	font-size: 5vh;
+}
+
+.result {
+	margin-top: 10px;
+}
+
+.result img {
+	width: 70%;
+}
+
+@media screen and (min-width: 64em) {
+	.result img {
+		width: 50%;
+	}
+}

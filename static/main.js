@@ -6,33 +6,32 @@ function processResponse(result) {
 	<div class="pure-u-1">Legacy: {{legacy}}</div>
 	<div class="pure-u-1">Copay: {{copay}}</div>
 	<div class="pure-u-1" style="height:2em"></div>
-	<div id="legacy" class="pure-u-1-3 pure-u-md-1">Legacy</div>
-	<div id="cashaddr" class="pure-u-1-3 pure-u-md-1">CashAddress</div>
-	<div id="copay" class="pure-u-1-3 pure-u-md-1">Copay</div>`;
+	<div id="legacy" class="pure-u-1 pure-u-md-1-3 result"><div class="result-label">Legacy</div></div>
+	<div id="cashaddr" class="pure-u-1 pure-u-md-1-3 result"><div class="result-label">CashAddress</div></div>
+	<div id="copay" class="pure-u-1 pure-u-md-1-3 result"><div class="result-label">Copay</div></div>`;
 	var html = Mustache.to_html(template, result);
 	document.getElementById("result").innerHTML = html;
 
 	var qrcode = new QRCode(document.getElementById("cashaddr"), {
 		mode: 1,
 		text: result.cashaddr.toUpperCase(),
-		width: 164,
-		height: 164,
+		width: 256,
+		height: 256,
 		correctLevel: QRCode.CorrectLevel.L,
-
 	});
 
 	var qrcode = new QRCode(document.getElementById("legacy"), {
 		text: result.legacy,
-		width: 164,
-		height: 164,
-		correctLevel: QRCode.CorrectLevel.L
+		width: 256,
+		height: 256,
+		correctLevel: QRCode.CorrectLevel.L,
 	});
 
 	var qrcode = new QRCode(document.getElementById("copay"), {
 		text: result.copay,
-		width: 164,
-		height: 164,
-		correctLevel: QRCode.CorrectLevel.L
+		width: 256,
+		height: 256,
+		correctLevel: QRCode.CorrectLevel.L,
 	});
 }
 
