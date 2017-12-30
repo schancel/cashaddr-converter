@@ -5,10 +5,19 @@ address formats.  The intent is to provide a command line tool, a
 reference implementation, and a microservice for use by the Bitcoin Cash
 community.
 
+# Prerequisites
+
+The following are only required for `make image` and `make run`.
+
+Install docker: https://docs.docker.com/engine/installation/linux/docker-ce/
+
+Add your user to the docker group: `sudo usermod -aG docker ${USER}` and reload the group: `newgrp docker`
+
 # Building
 
 Run `make` to obtain `addrconv` and `svc` binaries.  Run `make image` to
-obtain a docker image of the service which listens on port 3000
+obtain a docker image of the service which listens on port 3000.  Run `make run`
+to run the service.
 
 # Packages
 
