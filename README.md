@@ -53,6 +53,7 @@ javascript interacts with the provided api.
 * [Specification](https://github.com/Bitcoin-UAHF/spec/blob/master/cashaddr.md)
 * [Chris Pacia's Go Implementation](https://github.com/cpacia/bchutil/)
 * [GopherJS Converter](https://github.com/cashaddress/cashaddress.github.io)
+* [Javascript](https://github.com/bitcoincashjs/cashaddrjs)
 * [Bitpay's Converter](https://github.com/bitpay/address-translator)
 * [Python](https://github.com/fyookball/electrum/blob/master/lib/cashaddr.py)
 * [C++ Part 1](https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/cashaddrenc.cpp), [C++ Part 2](https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/cashaddr.cpp), [Base32 Functions](https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/utilstrencodings.cpp), [ConvertBits Function](https://github.com/Bitcoin-ABC/bitcoin-abc/blob/26bef497950b4d499f8a9e32f42d9cf6439f089f/src/utilstrencodings.h#L152)
