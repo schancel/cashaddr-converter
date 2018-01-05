@@ -56,7 +56,7 @@ function responeHandler(xhr, func, errfunc) {
 function handleSubmit(event) {
 	event.preventDefault();
 
-	var address=encodeURIComponent(document.getElementById("address").value)
+	var address=encodeURIComponent(document.getElementById("address").value.trim())
 	xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = responeHandler(xhr, processResponse, processError);
 	xhr.open("GET", "/convert?address="+address, true);
