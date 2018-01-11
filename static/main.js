@@ -30,7 +30,9 @@ const dispatch = ((state) => (action, payload) => {
 	}
 })({
 	scene: 'loading',
-	form: {},
+	form: {
+		address: ''
+	},
 	address: {},
 	error: ''
 });
@@ -106,7 +108,7 @@ function integrate(state, action, payload) {
 
 function render(state) {
 	const container = element('container');
-	container.innerHTML = scenes[state.scene](state[state.scene]);
+	container.innerHTML = scenes[state.scene](state);
 
 	if (state.scene !== 'address') return;
 
@@ -130,7 +132,7 @@ const scenes = {
 		<div class="loading-indicator">Loading...</div>
 	`,
 
-	form: () => `
+	form: ({form}) => `
 		<form id="address-form">
 			<input type="text"
 				id="address"
@@ -138,34 +140,35 @@ const scenes = {
 				autofocus
 				autocomplete="off"
 				placeholder="qr2z7dusk64qn960h9vspf2ezewl0pla9gcpnk35f0"
+				value="${form.address}"
 				maxlength="64" />
 			<input type="submit" id="submit-address" value="Convert">
 		</form>
 	`,
 
-	address: ({cashaddr, legacy, copay}) => `
-		${scenes.form()}
+	address: ({form, address}) => `
+		${scenes.form({form})}
 		<div id="qr-codes">
 			<div class="qr-card">
 				<div class="qr-label">Legacy</div>
-				<div class="qr-address">${legacy}</div>
+				<div class="qr-address">${address.legacy}</div>
 				<div id="legacy" class="qr-code"></div>
 			</div>
 			<div class="qr-card">
 				<div class="qr-label">CashAddress</div>
-				<div class="qr-address">${cashaddr}</div>
+				<div class="qr-address">${address.cashaddr}</div>
 				<div id="cashaddr" class="qr-code"></div>
 			</div>
 			<div class="qr-card">
 				<div class="qr-label">Copay</div>
-				<div class="qr-address">${copay}</div>
+				<div class="qr-address">${address.copay}</div>
 				<div id="copay" class="qr-code"></div>
 			</div>
 		</div>
 	`,
 
-	error: (error) => `
-		${scenes.form()}
+	error: ({form, error}) => `
+		${scenes.form({form})}
 		<div id="error-container">
 			<div id="error">
 				<div>
