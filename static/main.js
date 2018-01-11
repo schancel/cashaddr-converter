@@ -23,7 +23,7 @@ const proxy = (action, ids) => (event) => {
 
 const dispatch = ((state) => (action, payload) => {
 	const old = state.scene;
-	defer(() => process(action, payload, state));
+	defer(() => sideeffects(action, payload, state));
 	state = integrate(state, action, payload);
 	if (state.scene !== old) {
 		render(state);
@@ -39,7 +39,7 @@ const dispatch = ((state) => (action, payload) => {
 
 const defer = (fn) => setTimeout(fn, 0);
 
-function process(action, payload, state) {
+function sideeffects(action, payload, state) {
 	switch (action) {
 	case 'submit':
 		fetch(`/convert?address=${encodeURIComponent(state.form.address)}`)
