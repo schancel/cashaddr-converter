@@ -150,19 +150,34 @@ const scenes = {
 		${scenes.form({form})}
 		<div id="qr-codes">
 			<div class="qr-card">
-				<div class="qr-label">Legacy</div>
-				<div class="qr-address">${address.legacy}</div>
-				<div id="legacy" class="qr-code"></div>
-			</div>
-			<div class="qr-card">
 				<div class="qr-label">CashAddress</div>
-				<div class="qr-address">${address.cashaddr}</div>
+				<div class="qr-address">
+					<input readonly type="text"
+						name="cashaddr"
+						value="${address.cashaddr}" />
+					<button>copy</button>
+				</div>
 				<div id="cashaddr" class="qr-code"></div>
 			</div>
 			<div class="qr-card">
 				<div class="qr-label">Copay</div>
-				<div class="qr-address">${address.copay}</div>
+				<div class="qr-address">
+					<input readonly type="text"
+						name="copay"
+						value="${address.copay}" />
+					<button>copy</button>
+				</div>
 				<div id="copay" class="qr-code"></div>
+			</div>
+			<div class="qr-card">
+				<div class="qr-label">Legacy</div>
+				<div class="qr-address">
+					<input readonly type="text"
+						name="legacy"
+						value="${address.legacy}" />
+					<button>copy</button>
+				</div>
+				<div id="legacy" class="qr-code"></div>
 			</div>
 		</div>
 	`,
