@@ -104,20 +104,34 @@ button, input[type=submit] {
 
 #qr-codes {
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: space-around;
+	flex-direction: column;
+	align-items: stretch;
 	margin-top: 1em;
 }
 
 .qr-card {
-	display: flex;
+	display: none;
 	flex-direction: column;
 	align-items: stretch;
 	background-color: white;
 	border-radius: 5px;
 	padding: 1em;
 	margin-bottom: 1em;
+}
+
+.tab {
+	cursor: pointer;
+	flex-grow: 1;
+}
+
+.tab.selected-tab {
+	font-weight: bold;
+	background-color: white;
+	border-bottom: 1px solid white;
+}
+
+.qr-card.selected-tab {
+	display: flex;
 }
 
 .qr-label {
@@ -150,4 +164,15 @@ button, input[type=submit] {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+
+#tabs {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: stretch;
+}
+
+.tab {
+	border: 1px solid silver;
 }

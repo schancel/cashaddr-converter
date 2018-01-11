@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	const container = element('container');
 	container.addEventListener('click', proxy('submit', ['submit-address']));
 	container.addEventListener('click', proxy('start', ['dismiss-error']));
+	container.addEventListener('click',
+		proxy('click-tab', ['cashaddr-tab', 'copay-tab', 'legacy-tab']));
 	container.addEventListener('change', proxy('change-address', ['address']));
 	dispatch('start');
 });
@@ -22,6 +24,7 @@ const proxy = (action, ids) => (event) => {
 };
 
 const dispatch = ((state) => (action, payload) => {
+	console.log(`[${action}]`, payload);
 	const old = state.scene;
 	defer(() => sideeffects(action, payload, state));
 	state = integrate(state, action, payload);
@@ -34,6 +37,7 @@ const dispatch = ((state) => (action, payload) => {
 		address: ''
 	},
 	address: {},
+	tab: 'cashaddr',
 	error: ''
 });
 
@@ -45,6 +49,9 @@ function sideeffects(action, payload, state) {
 		fetch(`/convert?address=${encodeURIComponent(state.form.address)}`)
 			.then(parse)
 			.then(resolve('convert'), reject('convert'));
+		break;
+	case 'click-tab':
+		render(state);
 	}
 }
 
@@ -69,22 +76,22 @@ const reject = (action) => (message) => {
 const merge = (...args) => Object.assign({}, ...args);
 
 function integrate(state, action, payload) {
-	const {scene, form, address, error} = state;
+	const {scene, form, address, tab, error} = state;
 	switch (action) {
 	case 'start':
 		return {
 			scene: 'form',
-			form, address, error
+			form, address, tab, error
 		};
 	case 'change-address':
 		return {
 			form: merge(state.form, {[payload.name]: payload.value}),
-			scene, address, error
+			scene, address, tab, error
 		};
 	case 'submit':
 		return {
 			scene: 'loading',
-			form, address, error
+			form, address, tab, error
 		};
 	case 'convert-success':
 		return {
@@ -94,13 +101,18 @@ function integrate(state, action, payload) {
 				legacy: payload.legacy,
 				copay: payload.copay
 			},
-			form, error
+			form, tab, error
 		};
 	case 'convert-error':
 		return {
 			scene: 'error',
 			error: payload.error,
-			form, address
+			form, tab, address
+		};
+	case 'click-tab':
+		return {
+			tab: payload.name,
+			scene, form, address, error
 		};
 	}
 	return state;
@@ -146,11 +158,24 @@ const scenes = {
 		</form>
 	`,
 
-	address: ({form, address}) => `
+	address: ({tab, form, address}) => `
 		${scenes.form({form})}
 		<div id="qr-codes">
-			<div class="qr-card">
-				<div class="qr-label">CashAddress</div>
+			<div id="tabs">
+				<button class="tab${tab === 'cashaddr' ? ' selected-tab' : ''}"
+					id="cashaddr-tab" name="cashaddr">
+					CashAddress
+				</button>
+				<button class="tab${tab === 'copay' ? ' selected-tab' : ''}"
+					id="copay-tab" name="copay">
+					Copay
+				</button>
+				<button class="tab${tab === 'legacy' ? ' selected-tab' : ''}"
+					id="legacy-tab" name="legacy">
+					Legacy
+				</button>
+			</div>
+			<div class="qr-card${tab === 'cashaddr' ? ' selected-tab' : ''}">
 				<div class="qr-address">
 					<input readonly type="text"
 						name="cashaddr"
@@ -159,8 +184,7 @@ const scenes = {
 				</div>
 				<div id="cashaddr" class="qr-code"></div>
 			</div>
-			<div class="qr-card">
-				<div class="qr-label">Copay</div>
+			<div class="qr-card${tab === 'copay' ? ' selected-tab' : ''}">
 				<div class="qr-address">
 					<input readonly type="text"
 						name="copay"
@@ -169,8 +193,7 @@ const scenes = {
 				</div>
 				<div id="copay" class="qr-code"></div>
 			</div>
-			<div class="qr-card">
-				<div class="qr-label">Legacy</div>
+			<div class="qr-card${tab === 'legacy' ? ' selected-tab' : ''}">
 				<div class="qr-address">
 					<input readonly type="text"
 						name="legacy"
