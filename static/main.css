@@ -16,6 +16,7 @@ body {
 	font-family: sans-serif;
 	margin: 0;
 	padding: 0;
+	line-height: 1.5em;
 }
 
 #address-converter {
@@ -29,8 +30,21 @@ body {
 	margin-bottom: 1em;
 }
 
+#donate {
+	text-align: center;
+	margin-bottom: 2em;
+}
+
 @media only screen and (max-width : 560px) {
-	#banner, #container {
+	#banner h1 {
+		display: none;
+	}
+
+	#banner {
+		margin-top: 1em;
+	}
+
+	#banner, #container, #donate {
 		width: 100%;
 	}
 
@@ -40,7 +54,11 @@ body {
 }
 
 @media only screen and (min-width : 561px) {
-	#banner, #container {
+	#banner h1 {
+		display: block;
+	}
+
+	#banner, #container, #donate {
 		width: 80%;
 		max-width: 960px;
 	}
@@ -57,9 +75,10 @@ body {
 	flex-wrap: wrap;
 	background: white;
 	padding: 1em;
+	margin-bottom: 2em;
 }
 
-button, input[type=submit] {
+input[type=submit] {
 	padding: 0.5em 1em;
 	height: 3em;
 	margin: 0;
@@ -122,6 +141,8 @@ button, input[type=submit] {
 .tab {
 	cursor: pointer;
 	flex-grow: 1;
+	font-size: 150%;
+	height: 2em;
 }
 
 .tab.selected-tab {
@@ -143,6 +164,7 @@ button, input[type=submit] {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	align-items: stretch;
 	border-radius: .25em;
 	border: 1px solid silver;
 	font-weight: bold;
@@ -157,6 +179,16 @@ button, input[type=submit] {
 	border: none;
 	padding: 1em;
 	width: 40em;
+}
+
+.qr-address button {
+	cursor: pointer;
+	padding: 1em 1.5em;
+	margin: 0;
+}
+
+.qr-address button span {
+	font-size: 150%;
 }
 
 .qr-code {

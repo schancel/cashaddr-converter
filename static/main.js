@@ -5,75 +5,40 @@
 ;(() => {
 
 document.addEventListener('DOMContentLoaded', () => {
-	const container = element('container');
-	container.addEventListener('click', proxy('submit', ['submit-address']));
-	container.addEventListener('click', proxy('start', ['dismiss-error']));
-	container.addEventListener('click',
-		proxy('click-tab', ['cashaddr-tab', 'copay-tab', 'legacy-tab']));
-	container.addEventListener('change', proxy('change-address', ['address']));
+	const dispatch = ui.initialize({
+		container: ui.element('container'),
+		state: {
+			scene: 'loading',
+			form: {
+				address: ''
+			},
+			address: {},
+			tab: 'cashaddr',
+			error: ''
+		},
+		events: {
+			'submit': {
+				'click': ['submit-address']
+			},
+			'start': {
+				'click': ['dismiss-error']
+			},
+			'click-tab': {
+				'click': ['cashaddr-tab', 'copay-tab', 'legacy-tab']
+			},
+			'copy': {
+				'click': ['copy-cashaddr', 'copy-copay', 'copy-legacy']
+			},
+			'change-address': {
+				'change': ['address']
+			}
+		},
+
+		scenes, integrate, react
+	});
+
 	dispatch('start');
 });
-
-const element = document.getElementById.bind(document);
-
-const proxy = (action, ids) => (event) => {
-	const {id, name, value} = event.target;
-	if (ids.indexOf(id) < 0) return;
-	event.preventDefault();
-	dispatch(action, {name, value});
-};
-
-const dispatch = ((state) => (action, payload) => {
-	console.log(`[${action}]`, payload);
-	const old = state.scene;
-	defer(() => sideeffects(action, payload, state));
-	state = integrate(state, action, payload);
-	if (state.scene !== old) {
-		render(state);
-	}
-})({
-	scene: 'loading',
-	form: {
-		address: ''
-	},
-	address: {},
-	tab: 'cashaddr',
-	error: ''
-});
-
-const defer = (fn) => setTimeout(fn, 0);
-
-function sideeffects(action, payload, state) {
-	switch (action) {
-	case 'submit':
-		fetch(`/convert?address=${encodeURIComponent(state.form.address)}`)
-			.then(parse)
-			.then(resolve('convert'), reject('convert'));
-		break;
-	case 'click-tab':
-		render(state);
-	}
-}
-
-function parse(response) {
-	if (response.ok) {
-		return response.json();
-	} else {
-		return response.text().then((message) => { throw message; });
-	}
-}
-
-const resolve = (action) => (value) => {
-	dispatch(`${action}-success`, value);
-	return value;
-};
-
-const reject = (action) => (message) => {
-	dispatch(`${action}-error`, {error: message});
-	return message;
-};
-
-const merge = (...args) => Object.assign({}, ...args);
 
 function integrate(state, action, payload) {
 	const {scene, form, address, tab, error} = state;
@@ -85,7 +50,7 @@ function integrate(state, action, payload) {
 		};
 	case 'change-address':
 		return {
-			form: merge(state.form, {[payload.name]: payload.value}),
+			form: ui.merge(state.form, {[payload.name]: payload.value}),
 			scene, address, tab, error
 		};
 	case 'submit':
@@ -96,11 +61,7 @@ function integrate(state, action, payload) {
 	case 'convert-success':
 		return {
 			scene: 'address',
-			address: {
-				cashaddr: payload.cashaddr.toUpperCase(),
-				legacy: payload.legacy,
-				copay: payload.copay
-			},
+			address: payload,
 			form, tab, error
 		};
 	case 'convert-error':
@@ -118,33 +79,69 @@ function integrate(state, action, payload) {
 	return state;
 }
 
-function render(state) {
-	const container = element('container');
-	container.innerHTML = scenes[state.scene](state);
+const react = (old, action, payload) => (state, render, dispatch) => {
+	if (old.scene !== state.scene) render();
 
-	if (state.scene !== 'address') return;
+	switch (action) {
+	case 'submit':
+		fetch(`/convert?address=${encodeURIComponent(state.form.address)}`)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				} else {
+					return response.text().then((message) => { throw message; });
+				}
+			})
+			.then(
+				(addresses) => dispatch('convert-success', addresses),
+				(message) => dispatch(`convert-error`, {error: message})
+			);
+		break;
 
-	const options = (text) => {
-		return {
-			text,
+	case 'copy':
+		switch (payload.name) {
+		case 'copy-cashaddr':
+			ui.element('cashaddr-address').select();
+			break;
+		case 'copy-copay':
+			ui.element('copay-address').select();
+			break;
+		case 'copy-legacy':
+			ui.element('legacy-address').select();
+		}
+		if (document.execCommand('copy')) {
+			dispatch('copy-success');
+		} else {
+			dispatch('copy-error');
+		}
+		break;
+
+	case 'click-tab':
+	case 'convert-success':
+		render();
+		new QRCode(ui.element(state.tab), {
+			text: state.address[state.tab],
 			mode: 1,
 			width: 256,
 			height: 256,
 			correctLevel: QRCode.CorrectLevel.L,
-		};
-	};
-
-	new QRCode(element('cashaddr'), options(state.address.cashaddr));
-	new QRCode(element('legacy'), options(state.address.legacy));
-	new QRCode(element('copay'), options(state.address.copay));
-}
+		});
+	}
+};
 
 const scenes = {
-	loading: () => `
-		<div class="loading-indicator">Loading...</div>
+	loading: (scenes, state) => `
+		${scenes.form(scenes, state)}
+		<div class="sk-folding-cube">
+			<div class="sk-cube1 sk-cube"></div>
+			<div class="sk-cube2 sk-cube"></div>
+			<div class="sk-cube4 sk-cube"></div>
+			<div class="sk-cube3 sk-cube"></div>
+		</div>
 	`,
 
-	form: ({form}) => `
+
+	form: (scenes, state) => `
 		<form id="address-form">
 			<input type="text"
 				id="address"
@@ -152,71 +149,146 @@ const scenes = {
 				autofocus
 				autocomplete="off"
 				placeholder="qr2z7dusk64qn960h9vspf2ezewl0pla9gcpnk35f0"
-				value="${form.address}"
+				value="${state.form.address}"
 				maxlength="64" />
 			<input type="submit" id="submit-address" value="Convert">
 		</form>
 	`,
 
-	address: ({tab, form, address}) => `
-		${scenes.form({form})}
+	address: (scenes, state) => `
+		${scenes.form(scenes, state)}
 		<div id="qr-codes">
 			<div id="tabs">
-				<button class="tab${tab === 'cashaddr' ? ' selected-tab' : ''}"
+				<button class="tab${state.tab === 'cashaddr' ? ' selected-tab' : ''}"
 					id="cashaddr-tab" name="cashaddr">
-					CashAddress
+					CashAddr
 				</button>
-				<button class="tab${tab === 'copay' ? ' selected-tab' : ''}"
+				<button class="tab${state.tab === 'copay' ? ' selected-tab' : ''}"
 					id="copay-tab" name="copay">
 					Copay
 				</button>
-				<button class="tab${tab === 'legacy' ? ' selected-tab' : ''}"
+				<button class="tab${state.tab === 'legacy' ? ' selected-tab' : ''}"
 					id="legacy-tab" name="legacy">
 					Legacy
 				</button>
 			</div>
-			<div class="qr-card${tab === 'cashaddr' ? ' selected-tab' : ''}">
+			<div class="qr-card${state.tab === 'cashaddr' ? ' selected-tab' : ''}">
 				<div class="qr-address">
 					<input readonly type="text"
+						id="cashaddr-address"
 						name="cashaddr"
-						value="${address.cashaddr}" />
-					<button>copy</button>
+						value="${state.address.cashaddr}" />
+					<button id="copy-cashaddr"
+						title="copy cashaddr to clipboard"
+						name="copy-cashaddr">
+						<span class="ion-clipboard"></span>
+					</button>
 				</div>
 				<div id="cashaddr" class="qr-code"></div>
 			</div>
-			<div class="qr-card${tab === 'copay' ? ' selected-tab' : ''}">
+			<div class="qr-card${state.tab === 'copay' ? ' selected-tab' : ''}">
 				<div class="qr-address">
 					<input readonly type="text"
+						id="copay-address"
 						name="copay"
-						value="${address.copay}" />
-					<button>copy</button>
+						value="${state.address.copay}" />
+					<button id="copy-copay"
+						title="copy copay to clipboard"
+						name="copy-copay">
+						<span class="ion-clipboard"></span>
+					</button>
 				</div>
 				<div id="copay" class="qr-code"></div>
 			</div>
-			<div class="qr-card${tab === 'legacy' ? ' selected-tab' : ''}">
+			<div class="qr-card${state.tab === 'legacy' ? ' selected-tab' : ''}">
 				<div class="qr-address">
 					<input readonly type="text"
+						id="legacy-address"
 						name="legacy"
-						value="${address.legacy}" />
-					<button>copy</button>
+						value="${state.address.legacy}" />
+					<button id="copy-legacy"
+						title="copy legacy address to clipboard"
+						name="copy-legacy">
+						<span class="ion-clipboard"></span>
+					</button>
 				</div>
 				<div id="legacy" class="qr-code"></div>
 			</div>
 		</div>
 	`,
 
-	error: ({form, error}) => `
-		${scenes.form({form})}
+	error: (scenes, state) => `
+		${scenes.form(scenes, state)}
 		<div id="error-container">
 			<div id="error">
 				<div>
 					<span class="ion-alert-circled"></span>
-					${error}
+					${state.error}
 				</div>
 				<div id="dismiss-error" class="ion-close"></div>
 			</div>
 		</div>
-	`
+	`,
+};
+
+})();
+
+;(() => {
+
+const defer = (fn) => setTimeout(fn, 0);
+const delay = (duration) => (value) => new Promise((resolve) => setTimeout(() => resolve(value), duration));
+const merge = (...args) => Object.assign({}, ...args);
+const dedupe = (array) => keys(array.reduce((out, string) => (out[string] = true) && out, {}));
+const keys = Object.keys;
+const flatten = (array) => array.reduce((out, ary) => out.concat(ary), []);
+const values = (object) => keys(object).map(key => object[key]);
+const unzip = (object) => keys(object).map(key => [key, object[key]]);
+const first = (array) => array[0];
+const once = (fn, value, done = false) => (...args) => {
+	if (done) return value;
+	done = true;
+	return (value = fn(...args));
+};
+
+const element = document.getElementById.bind(document);
+
+const initialize = ({container, state, events, scenes, integrate, react}) => {
+	const dispatch = (action, payload) => {
+		if (window.DEBUG) console.log(`[${action}]`, payload);
+		const postintegrate = react(state, action, payload);
+		state = integrate(state, action, payload);
+		const render = once(() => {
+			container.innerHTML = scenes[state.scene](scenes, state);
+		});
+		postintegrate(state, render, (...args) => defer(() => dispatch(...args)));
+	};
+
+	dedupe(flatten(values(events).map(unzip)).map(first)).forEach(event => {
+		const ids = {};
+		unzip(events).forEach(([action, def]) => {
+			if (!def[event]) return;
+			def[event].forEach(id => {
+				ids[id] = ids[id] || [];
+				ids[id].push(action);
+			});
+		});
+
+		container.addEventListener(event, (e) => {
+			const {id, name, value} = e.target;
+			if (!ids[id]) return;
+			e.preventDefault();
+			ids[id].forEach(action => dispatch(action, {name, value}));
+		});
+	});
+
+	return dispatch;
+};
+
+window.ui = {
+	defer, delay, once,
+	keys, values, merge, unzip,
+	dedupe, first, flatten,
+	element, initialize,
 };
 
 })();
