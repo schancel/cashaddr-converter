@@ -42,7 +42,7 @@ func Decode(addr string, defaultPrefix string) (*Address, error) {
 	}
 
 	// Unpack the address without the checksum bits
-	raw, err := unpackAddress(decoded[:len(decoded)-8], prefix)
+	raw, err := unpackAddress(decoded[:len(decoded)-8], strings.ToLower(prefix))
 	return raw, err
 }
 
