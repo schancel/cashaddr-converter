@@ -43,6 +43,9 @@ func FromBase32(input string) ([]uint8, error) {
 	out := make([]uint8, 0, len(input))
 
 	for _, c := range input {
+		if int(c) >= len(charset_rev) {
+			return nil, errors.New("invalid base32 input string")
+		}
 		val := charset_rev[c]
 		if val == -1 {
 			return nil, errors.New("invalid base32 input string")
