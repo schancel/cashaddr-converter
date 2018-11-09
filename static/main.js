@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				'click': ['copy-cashaddr', 'copy-copay', 'copy-legacy']
 			},
 			'change-address': {
-				'change': ['address']
+				'input': ['address']
 			}
 		},
 
@@ -50,8 +50,9 @@ function integrate(state, action, payload) {
 		};
 	case 'change-address':
 		return {
+      scene: 'form',
 			form: ui.merge(state.form, {[payload.name]: payload.value}),
-			scene, address, tab, error
+			address, tab, error
 		};
 	case 'submit':
 		return {
