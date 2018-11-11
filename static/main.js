@@ -179,10 +179,6 @@ const scenes = {
           id="cashaddr-tab" name="cashaddr">
           CashAddr
         </button>
-        <button class="tab${state.tab === 'copay' ? ' selected-tab' : ''}"
-          id="copay-tab" name="copay">
-          Copay
-        </button>
         <button class="tab${state.tab === 'legacy' ? ' selected-tab' : ''}"
           id="legacy-tab" name="legacy">
           Legacy
@@ -201,20 +197,6 @@ const scenes = {
           </button>
         </div>
         <div id="cashaddr" class="qr-code"></div>
-      </div>
-      <div class="qr-card${state.tab === 'copay' ? ' selected-tab' : ''}">
-        <div class="qr-address">
-          <input readonly type="text"
-            id="copay-address"
-            name="copay"
-            value="${state.address.copay}" />
-          <button id="copy-copay"
-            title="copy copay to clipboard"
-            name="copy-copay">
-            <span class="ion-clipboard"></span>
-          </button>
-        </div>
-        <div id="copay" class="qr-code"></div>
       </div>
       <div class="qr-card${state.tab === 'legacy' ? ' selected-tab' : ''}">
         <div class="qr-address">
