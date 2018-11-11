@@ -4,6 +4,59 @@
 
 ;(() => {
 
+// blacklist test vectors from spec (known fake addresses)
+const BLACKLIST = [
+  'prefix:x64nx6hz',
+  'p:gpf8m4h7',
+  'bitcoincash:qpzry9x8gf2tvdw0s3jn54khce6mua7lcw20ayyn',
+  'bchtest:testnetaddress4d6njnut',
+  'bchreg:555555555555555555555555555555555555555555555udxmlmrz',
+  '1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu',
+  'bitcoincash:qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a',
+  '1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR',
+  'bitcoincash:qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy',
+  '16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb',
+  'bitcoincash:qqq3728yw0y47sqn6l2na30mcw6zm78dzqre909m2r',
+  '3CWFddi6m4ndiGyKqzYvsFYagqDLPVMTzC',
+  'bitcoincash:ppm2qsznhks23z7629mms6s4cwef74vcwvn0h829pq',
+  '3LDsS579y7sruadqu11beEJoTjdFiFCdX4',
+  'bitcoincash:pr95sy3j9xwd2ap32xkykttr4cvcu7as4yc93ky28e',
+  '31nwvkZwyPdgzjBJZXfDmSWsC4ZLKpYyUw',
+  'bitcoincash:pqq3728yw0y47sqn6l2na30mcw6zm78dzq5ucqzc37',
+  'bitcoincash:qr6m7j9njldwwzlg9v7v53unlr4jkmx6eylep8ekg2',
+  'bchtest:pr6m7j9njldwwzlg9v7v53unlr4jkmx6eyvwc0uz5t',
+  'pref:pr6m7j9njldwwzlg9v7v53unlr4jkmx6ey65nvtks5',
+  'prefix:0r6m7j9njldwwzlg9v7v53unlr4jkmx6ey3qnjwsrf',
+  'bitcoincash:q9adhakpwzztepkpwp5z0dq62m6u5v5xtyj7j3h2ws4mr9g0',
+  'bchtest:p9adhakpwzztepkpwp5z0dq62m6u5v5xtyj7j3h2u94tsynr',
+  'pref:p9adhakpwzztepkpwp5z0dq62m6u5v5xtyj7j3h2khlwwk5v',
+  'prefix:09adhakpwzztepkpwp5z0dq62m6u5v5xtyj7j3h2p29kc2lp',
+  'bitcoincash:qgagf7w02x4wnz3mkwnchut2vxphjzccwxgjvvjmlsxqwkcw59jxxuz',
+  'bchtest:pgagf7w02x4wnz3mkwnchut2vxphjzccwxgjvvjmlsxqwkcvs7md7wt',
+  'pref:pgagf7w02x4wnz3mkwnchut2vxphjzccwxgjvvjmlsxqwkcrsr6gzkn',
+  'prefix:0gagf7w02x4wnz3mkwnchut2vxphjzccwxgjvvjmlsxqwkc5djw8s9g',
+  'bitcoincash:qvch8mmxy0rtfrlarg7ucrxxfzds5pamg73h7370aa87d80gyhqxq5nlegake',
+  'bchtest:pvch8mmxy0rtfrlarg7ucrxxfzds5pamg73h7370aa87d80gyhqxq7fqng6m6',
+  'pref:pvch8mmxy0rtfrlarg7ucrxxfzds5pamg73h7370aa87d80gyhqxq4k9m7qf9',
+  'prefix:0vch8mmxy0rtfrlarg7ucrxxfzds5pamg73h7370aa87d80gyhqxqsh6jgp6w',
+  'bitcoincash:qnq8zwpj8cq05n7pytfmskuk9r4gzzel8qtsvwz79zdskftrzxtar994cgutavfklv39gr3uvz',
+  'bchtest:pnq8zwpj8cq05n7pytfmskuk9r4gzzel8qtsvwz79zdskftrzxtar994cgutavfklvmgm6ynej',
+  'pref:pnq8zwpj8cq05n7pytfmskuk9r4gzzel8qtsvwz79zdskftrzxtar994cgutavfklv0vx5z0w3',
+  'prefix:0nq8zwpj8cq05n7pytfmskuk9r4gzzel8qtsvwz79zdskftrzxtar994cgutavfklvwsvctzqy',
+  'bitcoincash:qh3krj5607v3qlqh5c3wq3lrw3wnuxw0sp8dv0zugrrt5a3kj6ucysfz8kxwv2k53krr7n933jfsunqex2w82sl',
+  'bchtest:ph3krj5607v3qlqh5c3wq3lrw3wnuxw0sp8dv0zugrrt5a3kj6ucysfz8kxwv2k53krr7n933jfsunqnzf7mt6x',
+  'pref:ph3krj5607v3qlqh5c3wq3lrw3wnuxw0sp8dv0zugrrt5a3kj6ucysfz8kxwv2k53krr7n933jfsunqjntdfcwg',
+  'prefix:0h3krj5607v3qlqh5c3wq3lrw3wnuxw0sp8dv0zugrrt5a3kj6ucysfz8kxwv2k53krr7n933jfsunqakcssnmn',
+  'bitcoincash:qmvl5lzvdm6km38lgga64ek5jhdl7e3aqd9895wu04fvhlnare5937w4ywkq57juxsrhvw8ym5d8qx7sz7zz0zvcypqscw8jd03f',
+  'bchtest:pmvl5lzvdm6km38lgga64ek5jhdl7e3aqd9895wu04fvhlnare5937w4ywkq57juxsrhvw8ym5d8qx7sz7zz0zvcypqs6kgdsg2g',
+  'pref:pmvl5lzvdm6km38lgga64ek5jhdl7e3aqd9895wu04fvhlnare5937w4ywkq57juxsrhvw8ym5d8qx7sz7zz0zvcypqsammyqffl',
+  'prefix:0mvl5lzvdm6km38lgga64ek5jhdl7e3aqd9895wu04fvhlnare5937w4ywkq57juxsrhvw8ym5d8qx7sz7zz0zvcypqsgjrqpnw8',
+  'bitcoincash:qlg0x333p4238k0qrc5ej7rzfw5g8e4a4r6vvzyrcy8j3s5k0en7calvclhw46hudk5flttj6ydvjc0pv3nchp52amk97tqa5zygg96mtky5sv5w',
+  'bchtest:plg0x333p4238k0qrc5ej7rzfw5g8e4a4r6vvzyrcy8j3s5k0en7calvclhw46hudk5flttj6ydvjc0pv3nchp52amk97tqa5zygg96mc773cwez',
+  'pref:plg0x333p4238k0qrc5ej7rzfw5g8e4a4r6vvzyrcy8j3s5k0en7calvclhw46hudk5flttj6ydvjc0pv3nchp52amk97tqa5zygg96mg7pj3lh8',
+  'prefix:0lg0x333p4238k0qrc5ej7rzfw5g8e4a4r6vvzyrcy8j3s5k0en7calvclhw46hudk5flttj6ydvjc0pv3nchp52amk97tqa5zygg96ms92w6845'
+];
+
 document.addEventListener('DOMContentLoaded', () => {
   const dispatch = ui.initialize({
     container: ui.element('container'),
@@ -43,12 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function integrate(state, action, payload) {
-  const {scene, form, address, tab, error} = state;
+  const {scene, form, address, tab, error, valid} = state;
+
   switch (action) {
   case 'start':
     return {
       scene: 'form',
       error: '',
+      valid: true,
       form, address, tab
     };
 
@@ -57,34 +112,57 @@ function integrate(state, action, payload) {
       scene: 'form',
       error: '',
       form: ui.merge(state.form, {[payload.name]: payload.value}),
-      address, tab
+      address, tab, valid
     };
 
   case 'submit':
-    return {
-      scene: 'loading',
-      error: '',
-      form, address, tab
-    };
+    let message = '';
+    let isValid = true;
+
+    if (state.form.address.length < 1) {
+      message = 'Please enter a Bitcoin Cash address to convert.';
+      isValid = false;
+    }
+
+    if (BLACKLIST.indexOf(state.form.address) > -1) {
+      message = 'The address you have entered is a test address. Please enter a real address.';
+      isValid = false;
+    }
+
+    if (isValid) {
+      return {
+        scene: 'loading',
+        valid: isValid,
+        form, address, tab, error
+      };
+    } else {
+      return {
+        scene: 'form',
+        error: message,
+        valid: isValid,
+        form, address, tab
+      };
+    }
 
   case 'convert-success':
     return {
       scene: 'address',
       address: payload,
-      form, tab, error
+      error: '',
+      form, tab, valid
     };
 
   case 'convert-error':
     return {
       scene: 'form',
       error: payload.error,
-      form, tab, address
+      form, tab, address, valid
     };
 
   case 'click-tab':
     return {
       tab: payload.name,
-      scene, form, address, error
+      scene, form, address, error, valid
     };
   }
 
@@ -97,8 +175,14 @@ const react = (old, action, payload) => (state, render, dispatch) => {
   switch (action) {
   case 'start':
     render();
+    break;
 
   case 'submit':
+    if (state.valid === false) {
+      render();
+      break;
+    }
+
     fetch(`/convert?address=${encodeURIComponent(state.form.address)}`)
       .then((response) => {
         if (response.ok) {
